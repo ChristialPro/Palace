@@ -1,0 +1,140 @@
+$ kubectl get pods
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-fb5c67579-rjpkd   1/1     Running   0          8s
+$ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   28s
+$ kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
+service/kubernetes-bootcamp exposed
+$ kubectl get services
+NAME                  TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes            ClusterIP   10.96.0.1       <none>        443/TCP          33s
+kubernetes-bootcamp   NodePort    10.108.215.95   <none>        8080:32387/TCP   2s
+$ kubectl describe services/kubernetes-bootcamp
+Name:                     kubernetes-bootcamp
+Namespace:                default
+Labels:                   app=kubernetes-bootcamp
+Annotations:              <none>
+Selector:                 app=kubernetes-bootcamp
+Type:                     NodePort
+IP Families:              <none>
+IP:                       10.108.215.95
+IPs:                      10.108.215.95
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  32387/TCP
+Endpoints:                172.18.0.3:8080
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+$ export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')
+$ echo NODE_PORT=$NODE_PORT
+NODE_PORT=32387
+$ curl $(minikube ip):$NODE_PORT
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-rjpkd | v=1
+$ kubectl describe deployment
+Name:                   kubernetes-bootcamp
+Namespace:              default
+CreationTimestamp:      Wed, 29 Mar 2023 17:22:49 +0000
+Labels:                 app=kubernetes-bootcamp
+Annotations:            deployment.kubernetes.io/revision: 1
+Selector:               app=kubernetes-bootcamp
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=kubernetes-bootcamp
+  Containers:
+   kubernetes-bootcamp:
+    Image:        gcr.io/google-samples/kubernetes-bootcamp:v1
+    Port:         8080/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   kubernetes-bootcamp-fb5c67579 (1/1 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  60s   deployment-controller  Scaled up replica set kubernetes-bootcamp-fb5c67579 to 1
+$ kubectl get pods -l app=kubernetes-bootcamp
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-fb5c67579-rjpkd   1/1     Running   0          62s
+$ kubectl get services -l app=kubernetes-bootcamp
+NAME                  TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+kubernetes-bootcamp   NodePort   10.108.215.95   <none>        8080:32387/TCP   50s
+$ export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+$ echo Name of the Pod: $POD_NAME
+Name of the Pod: kubernetes-bootcamp-fb5c67579-rjpkd
+$ kubectl label pods $POD_NAME version=v1
+pod/kubernetes-bootcamp-fb5c67579-rjpkd labeled
+$ kubectl describe pods $POD_NAME
+Name:         kubernetes-bootcamp-fb5c67579-rjpkd
+Namespace:    default
+Priority:     0
+Node:         minikube/10.0.0.18
+Start Time:   Wed, 29 Mar 2023 17:23:03 +0000
+Labels:       app=kubernetes-bootcamp
+              pod-template-hash=fb5c67579
+              version=v1
+Annotations:  <none>
+Status:       Running
+IP:           172.18.0.3
+IPs:
+  IP:           172.18.0.3
+Controlled By:  ReplicaSet/kubernetes-bootcamp-fb5c67579
+Containers:
+  kubernetes-bootcamp:
+    Container ID:   docker://1d9316d71c96b51329d0d2809034b90df0617ae91405cc2c396915a0c2798f35
+    Image:          gcr.io/google-samples/kubernetes-bootcamp:v1
+    Image ID:       docker-pullable://jocatalin/kubernetes-bootcamp@sha256:0d6b8ee63bb57c5f5b6156f446b3bc3b3c143d233037f3a2f00e279c8fcc64af
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Wed, 29 Mar 2023 17:23:05 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-zb9l8 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  default-token-zb9l8:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-zb9l8
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  71s   default-scheduler  Successfully assigned default/kubernetes-bootcamp-fb5c67579-rjpkd to minikube
+  Normal  Pulled     69s   kubelet            Container image "gcr.io/google-samples/kubernetes-bootcamp:v1" already present on machine
+  Normal  Created    69s   kubelet            Created container kubernetes-bootcamp
+  Normal  Started    69s   kubelet            Started container kubernetes-bootcamp
+$ kubectl get pods -l version=v1
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-fb5c67579-rjpkd   1/1     Running   0          72s
+$ $ kubectl delete service -l app=kubernetes-bootcamp
+service "kubernetes-bootcamp" deleted
+$ kubectl get services
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   3m38s
+$ curl $(minikube ip):$NODE_PORT
+curl: (7) Failed to connect to 10.0.0.18 port 32387: Connection refused
+$ kubectl exec -ti $POD_NAME -- curl localhost:8080
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-rjpkd | v=1

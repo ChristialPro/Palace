@@ -1,0 +1,102 @@
+kubectl get pods
+NAME                                  READY   STATUS    RESTARTS   AGE
+kubernetes-bootcamp-fb5c67579-x7m6w   1/1     Running   0          99s
+$ kubectl describe pods
+Name:         kubernetes-bootcamp-fb5c67579-x7m6w
+Namespace:    default
+Priority:     0
+Node:         minikube/10.0.0.22
+Start Time:   Wed, 29 Mar 2023 17:02:56 +0000
+Labels:       app=kubernetes-bootcamp
+              pod-template-hash=fb5c67579
+Annotations:  <none>
+Status:       Running
+IP:           172.18.0.3
+IPs:
+  IP:           172.18.0.3
+Controlled By:  ReplicaSet/kubernetes-bootcamp-fb5c67579
+Containers:
+  kubernetes-bootcamp:
+    Container ID:   docker://9c3678e4fcacc6479e14e1232331725604ca83ceb7df3b8a6dc3833fc7be43a3
+    Image:          gcr.io/google-samples/kubernetes-bootcamp:v1
+    Image ID:       docker-pullable://jocatalin/kubernetes-bootcamp@sha256:0d6b8ee63bb57c5f5b6156f446b3bc3b3c143d233037f3a2f00e279c8fcc64af
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Wed, 29 Mar 2023 17:02:58 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-kwgqf (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  default-token-kwgqf:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-kwgqf
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  103s  default-scheduler  Successfully assigned default/kubernetes-bootcamp-fb5c67579-x7m6w to minikube
+  Normal  Pulled     102s  kubelet            Container image "gcr.io/google-samples/kubernetes-bootcamp:v1" already present on machine
+  Normal  Created    102s  kubelet            Created container kubernetes-bootcamp
+  Normal  Started    101s  kubelet            Started container kubernetes-bootcamp
+echo -e "\n\n\n\e[92mStarting Proxy. After starting it will not output a response. Please click the first Terminal Tab\n"; kubectl proxy
+$ export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')
+$ echo Name of the Pod: $POD_NAME
+Name of the Pod: kubernetes-bootcamp-fb5c67579-x7m6w
+$ curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-x7m6w | v=1
+$ kubectl logs $POD_NAME
+Kubernetes Bootcamp App Started At: 2023-03-29T17:02:58.159Z | Running On:  kubernetes-bootcamp-fb5c67579-x7m6w 
+
+Running On: kubernetes-bootcamp-fb5c67579-x7m6w | Total Requests: 1 | App Uptime: 262.987 seconds | Log Time: 2023-03-29T17:07:21.146Z
+$ kubectl exec $POD_NAME -- env
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=kubernetes-bootcamp-fb5c67579-x7m6w
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_PORT=443
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_SERVICE_PORT_HTTPS=443
+NPM_CONFIG_LOGLEVEL=info
+NODE_VERSION=6.3.1
+HOME=/root
+$ kubectl exec -ti $POD_NAME -- bash
+root@kubernetes-bootcamp-fb5c67579-x7m6w:/# cat server.js
+var http = require('http');
+var requests=0;
+var podname= process.env.HOSTNAME;
+var startTime;
+var host;
+var handleRequest = function(request, response) {
+  response.setHeader('Content-Type', 'text/plain');
+  response.writeHead(200);
+  response.write("Hello Kubernetes bootcamp! | Running on: ");
+  response.write(host);
+  response.end(" | v=1\n");
+  console.log("Running On:" ,host, "| Total Requests:", ++requests,"| App Uptime:", (new Date() - startTime)/1000 , "seconds", "| Log Time:",new Date());
+}
+var www = http.createServer(handleRequest);
+www.listen(8080,function () {
+    startTime = new Date();;
+    host = process.env.HOSTNAME;
+    console.log ("Kubernetes Bootcamp App Started At:",startTime, "| Running On: " ,host, "\n" );
+});
+root@kubernetes-bootcamp-fb5c67579-x7m6w:/# root@kubernetes-bootcamp-fb5c67579-x7m6w:/# curl localhost:8080
+Hello Kubernetes bootcamp! | Running on: kubernetes-bootcamp-fb5c67579-x7m6w | v=1
+root@kubernetes-bootcamp-fb5c67579-x7m6w:/# exit
+exit
