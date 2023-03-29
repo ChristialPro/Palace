@@ -1,0 +1,23 @@
+$minikube version
+minikube version: v1.18.0
+commit: ec61815d60f66a6e4f6353030a40b12362557caa-dirty
+$ minikube start
+* minikube v1.18.0 on Ubuntu 18.04 (amd64)
+* Using the none driver based on existing profile
+
+X The requested memory allocation of 2200MiB does not leave room for system overhead (total system memory: 2460MiB). You may face stability issues.
+* Suggestion: Start minikube with less memory allocated: 'minikube start --memory=2200mb'
+
+* Starting control plane node minikube in cluster minikube
+* Running on localhost (CPUs=2, Memory=2460MB, Disk=194868MB) ...
+* OS release is Ubuntu 18.04.5 LTS
+* Preparing Kubernetes v1.20.2 on Docker 19.03.13 ...
+  - kubelet.resolv-conf=/run/systemd/resolve/resolv.conf
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Configuring local host environment ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v4
+* Enabled addons: default-storageclass, storage-provisioner
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
