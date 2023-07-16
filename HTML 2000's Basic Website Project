@@ -1,0 +1,9 @@
+<h1>Welcome to My Website!</h1>
+
+<!-- Add an image of yourself that links to the about page -->
+<a href="./public/about.html">About Me</a><img src="https://media.licdn.com/dms/image/D5622AQGpXKBX02hLbg/feedshare-shrink_1280/0/1688401386245?e=1692230400&amp;v=beta&amp;t=wMsnHZlhpnZclEwK-cRF5vJH1Y5xH6xZWtvgl9GypgE" loading="lazy" alt="No alt text provided for this image" id="ember746" class="ivm-view-attr__img--centered  feed-shared-image-viewer__image evi-image lazy-image ember-view">
+
+<hr />
+<!-- Add a link to your contact me page here -->
+
+<a href=".public/contact.html">Contact Me</a>
